@@ -10,7 +10,7 @@
         android:id="@+id/makeTalkButton"
         android:layout_width="200dp"
         android:layout_height="40dp"
-        android:layout_marginBottom="120dp"
+        android:layout_marginBottom="184dp"
         android:layout_marginEnd="92dp"
         android:text="Talk"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -24,7 +24,7 @@
         android:layout_marginTop="128dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="To Be Spoke"
+        android:text="Oh yes Daddy"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -63,4 +63,42 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="@+id/pitchBar"
         app:layout_constraintTop_toBottomOf="@+id/pitchBar" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Status"
+        app:layout_constraintStart_toStartOf="@+id/ipText"
+        app:layout_constraintTop_toBottomOf="@+id/ipText" />
+
+    <TextView
+        android:id="@+id/recText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="recText"
+        app:layout_constraintStart_toStartOf="@+id/statusText"
+        app:layout_constraintTop_toBottomOf="@+id/statusText" />
+
+    <TextView
+        android:id="@+id/ipText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="88dp"
+        android:layout_marginStart="160dp"
+        android:text="fake.fake.fake.fake"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/listenButton"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="128dp"
+        android:layout_marginEnd="92dp"
+        android:text="Listen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </android.support.constraint.ConstraintLayout>

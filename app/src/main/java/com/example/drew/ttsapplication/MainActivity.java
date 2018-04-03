@@ -25,9 +25,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.testTalk:
                 testTalking();
                 break;
-            case R.id.firstButton:
-                testTalking();
-                break;
         }
     }
 

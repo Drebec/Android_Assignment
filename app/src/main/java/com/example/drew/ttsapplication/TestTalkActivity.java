@@ -1,13 +1,29 @@
 package com.example.drew.ttsapplication;
 
+import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.ArrayList;
 
 /**
  * Created by Drew on 3/25/2018.
@@ -15,9 +31,13 @@ import android.widget.Toast;
 
 public class TestTalkActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener{
     EditText talkText;
+    public TextView statusText;
+    static TextView recText;
+    TextView ipText;
     SeekBar pitch, speed;
     String pitch_S, speed_S;
     TTS tts;
+    Server ss;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -27,6 +47,15 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
         talkText = (EditText) this.findViewById(R.id.talkText);
         Button talkButton = (Button) this.findViewById(R.id.makeTalkButton);
         talkButton.setOnClickListener(this);
+
+        Button listenButton = (Button) this.findViewById(R.id.listenButton);
+        listenButton.setOnClickListener(this);
+
+        statusText = (TextView) this.findViewById(R.id.statusText);
+        recText = (TextView) this.findViewById(R.id.recText);
+        ipText = (TextView) this.findViewById(R.id.ipText);
+        ipText.setText(getIpAddress());
+
 
         pitch = (SeekBar) findViewById(R.id.pitchBar);
         pitch.setMax(20);
@@ -40,10 +69,52 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
 
         tts = new TTS(this);
         tts.start();
+
+        ss = new Server(9999, tts);
+        Thread server = new Thread(ss);
+        server.start();
+
+
+    }
+
+    @SuppressLint("HandlerLeak")
+    public static final Handler handler = new Handler() {
+
+        public void handleMessage(Message msg) {
+            String aResponse = msg.getData().getString("client");
+            recText.setText(aResponse);
+        }
+    };
+
+    public static String getIpAddress() {
+        String ipAddress = "Unable to Fetch IP..";
+        try {
+            Enumeration en;
+            en = NetworkInterface.getNetworkInterfaces();
+            while (en.hasMoreElements()) {
+                NetworkInterface intf = (NetworkInterface)en.nextElement();
+                for (Enumeration enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = (InetAddress)enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()&&inetAddress instanceof Inet4Address)
+                        return inetAddress.getHostAddress();
+                }
+            }
+        } catch (SocketException ex) {
+            //ex.printStackTrace();
+        }
+        return ipAddress;
+    }
+
+    public void sendToTTS(String msg) {
+        Message sendMsg = tts.handler.obtainMessage();
+        Bundle b = new Bundle();
+        b.putString("TT", "10:10:" + msg);
+        sendMsg.setData(b);
+        tts.handler.sendMessage(sendMsg);
     }
 
     public void onClick(View v){
-        Toast.makeText(this, "onClick", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "onClick", Toast.LENGTH_SHORT).show();
         switch(v.getId()){
             case R.id.makeTalkButton:
                 String input = talkText.getText().toString();
@@ -56,6 +127,16 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                 sendMsg.setData(b);
                 tts.handler.sendMessage(sendMsg);
                 break;
+            case R.id.listenButton:
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening");
+                try {
+                    startActivityForResult(intent, 100);
+                } catch (ActivityNotFoundException e) {
+                    e.printStackTrace();
+                }
         }
     }
 
@@ -73,6 +154,24 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                     speed_S = "" + seekBar.getProgress() + ":";
                 }
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case 100: {
+                if (resultCode == RESULT_OK && null != data) {
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    String message = result.get(0);
+                    recText.setText(message);
+                    sendToTTS(message);
+                }
+                break;
+            }
+
         }
     }
 
