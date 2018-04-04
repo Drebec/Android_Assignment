@@ -4,7 +4,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # get local machine name
 #host = socket.gethostname()
-host = "192.168.0.106"
+host = "10.200.48.121"
 
 port = 9999
 
