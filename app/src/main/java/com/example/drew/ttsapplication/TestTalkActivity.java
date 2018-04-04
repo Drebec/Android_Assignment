@@ -13,13 +13,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -37,7 +37,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
     SeekBar pitch, speed;
     String pitch_S, speed_S;
     TTS tts;
-    Server ss;
+    Network networkManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -70,9 +70,10 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
         tts = new TTS(this);
         tts.start();
 
-        ss = new Server(9999, tts);
-        Thread server = new Thread(ss);
-        server.start();
+        networkManager = new Network(tts);
+        Thread networkThread = new Thread(networkManager);
+        networkThread.start();
+
 
 
     }
@@ -105,6 +106,14 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
         return ipAddress;
     }
 
+    public void sendToNetwork(String msg) {
+        Message toClient = networkManager.handler.obtainMessage();
+        Bundle n = new Bundle();
+        n.putString("N", msg);
+        toClient.setData(n);
+        networkManager.handler.sendMessage(toClient);
+    }
+
     public void sendToTTS(String msg) {
         Message sendMsg = tts.handler.obtainMessage();
         Bundle b = new Bundle();
@@ -126,6 +135,11 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                 b.putString("TT", msg);
                 sendMsg.setData(b);
                 tts.handler.sendMessage(sendMsg);
+                Message toClient = networkManager.handler.obtainMessage();
+                Bundle n = new Bundle();
+                n.putString("N", msg);
+                toClient.setData(n);
+                networkManager.handler.sendMessage(toClient);
                 break;
             case R.id.listenButton:
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -158,7 +172,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {  
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
@@ -167,7 +181,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String message = result.get(0);
                     recText.setText(message);
-                    sendToTTS(message);
+                    sendToNetwork(message);
                 }
                 break;
             }

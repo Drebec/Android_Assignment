@@ -43,7 +43,7 @@ public class SocketServer extends Thread {
             if(serverSocket == null) {
                 try {
                     serverSocket = new ServerSocket(SOCKETPORT);
-                    Log.v("LOGGING", "Server Listening");
+                    Log.v("LOGGING", "Receive Listening");
 
                     socket = serverSocket.accept();
                     parent.runOnUiThread(new Runnable() {
