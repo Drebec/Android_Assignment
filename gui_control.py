@@ -48,6 +48,7 @@ body_D = {"type":"body", "left_right":NO_MOVE, "left_right_target":MIN}
 
 wait_D = {"type":"wait", "delay":MIN_WAIT}
 
+
 thread_kill = False
 anican = 0
 
@@ -55,12 +56,14 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # get local machine name
 #host = socket.gethostname()
-host = "192.168.42.129"
+host = "10.200.23.65"
 
 port = 9999
 
 # connection to hostname on the port.
 s.connect((host, port))
+
+tts_D = {"type":"TTS", "socket":s, "phrase":"Default"}
 
 def wrap(i):
 	if i > 3:
@@ -218,6 +221,46 @@ def set_wait_settings(popup, settings_D, delay):
 	settings_D["delay"] = int(delay.get())
 	popup.destroy()
 
+def tts_settings_popup(settings_D):
+	popup = tk.Toplevel(width=300, height=400)
+	popup.title("TTS Settings")
+	phrase = tk.Scale(popup, scale_options, label="Phrase", from_=0, to=4)
+	phrase.pack()
+
+	p1 = tk.Label(popup, text="0. Hello World")
+	p2 = tk.Label(popup, text="1. My name is Slim Shady")
+	p3 = tk.Label(popup, text="2. What is love?")
+	p4 = tk.Label(popup, text="3. Baby don't hurt me")
+	p5 = tk.Label(popup, text="4. No more")
+	p1.pack()
+	p2.pack()
+	p3.pack()
+	p4.pack()
+	p5.pack()
+	
+
+	button = tk.Button(popup, text="Save Settings", command=lambda popup=popup, settings_D=settings_D, phrase=phrase: set_tts_settings(popup, settings_D, phrase))
+	button.pack()
+
+def set_tts_settings(popup, settings_D, phrase):
+	p = int(phrase.get())
+
+	print(str(p))
+
+	if(p == 0):
+		settings_D["phrase"] = "Hello World"
+	elif(p == 1):
+		settings_D["phrase"] = "My name is Slim Shady"
+	elif(p == 2):
+		settings_D["phrase"] = "What is love?"
+	elif(p == 3):
+		settings_D["phrase"] = "Baby don't hurt me"
+	elif(p == 4):
+		settings_D["phrase"] = "No more"
+
+	#settings_D["phrase"] = phrase
+	popup.destroy()
+
 def run_motor():
 	global ic, cmd_L, th_L, motor_img
 	can_L[ic].create_image(instruction_width/2,instruction_height/2, image=motor_img)
@@ -284,6 +327,7 @@ def run_TTS():
 	can_L[ic].create_rectangle(25, 25, 75, 75, fill="blue")
 
 	cmd_L.append({"type":"TTS", "socket":s, "phrase":"Test"})
+	can_L[ic].bind('<Button-1>', lambda event, settings_D=cmd_L[ic]: tts_settings_popup(settings_D))
 	ic += 1
 
 def delete_all():

@@ -74,7 +74,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
         Thread networkThread = new Thread(networkManager);
         networkThread.start();
 
-
+        //startListening();
 
     }
 
@@ -86,6 +86,18 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
             recText.setText(aResponse);
         }
     };
+
+    public void startListening() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening");
+        try {
+            startActivityForResult(intent, 100);
+        } catch (ActivityNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static String getIpAddress() {
         String ipAddress = "Unable to Fetch IP..";
@@ -180,8 +192,14 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                 if (resultCode == RESULT_OK && null != data) {
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String message = result.get(0);
+                    System.out.println(message);
+                    if(message.toLowerCase().equals("start")) {
+
+                    } else {
+                        startListening();
+                    }
                     recText.setText(message);
-                    sendToNetwork(message);
+                    //sendToNetwork(message);
                 }
                 break;
             }
