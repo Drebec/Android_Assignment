@@ -86,12 +86,12 @@ def receive():
     global recv_B
     print("Entered thread")
     while(True):
-	
+
         input = s.recv(1024)
         input = input.decode('ascii')
         print(input)
         decode(input)
-	
+
 run_main = False
 def decode(input):
 	global run_main
@@ -110,9 +110,34 @@ def decode(input):
 		words = input.lower().split(" ")
 		for i in range(len(words)):
 			if(words[i] == "move"):
-				createSendThread("Moving")
+				if(words[i+1] == "forward"):
+					command = Motor(1, 0, int(words[i+3]), 1200, 0)
+					createSendThread("Moving")
+					command.execute()
+					break
+				elif(words[i+1] == "backward"):
+					command = Motor(-1, 0, int(words[i+3]), 1200, 0)
+					createSendThread("Moving")
+					command.execute()
+					break
+				else:
+					pass
 				valid_speech = True
 				pass
+			elif(words[i] == "turn"):
+				if(words[i+1] == "right"):
+					command = Motor(0, 1, int(words[i+3]), 0, 1200)
+					createSendThread("Turning")
+					command.execute()
+					break
+				elif(words[i+1] == "left"):
+					command = Motor(0, -1, int(words[i+3]), 0, 1200)
+					createSendThread("Turning")
+					command.execute()
+					break
+				else:
+					pass
+				valid_speech = True
 			elif(words[i] == "wait"):
 				createSendThread("Waiting")
 				valid_speech = True
@@ -144,8 +169,8 @@ def decode(input):
 	if(valid_speech):
 		time.sleep(2)
 		STT.clear_block(False)
-	
-		
+
+
 def animate_rect(color, can):
 	global thread_kill
 	i = 0
@@ -298,7 +323,7 @@ def tts_settings_popup(settings_D):
 	p4.pack()
 	p5.pack()
 	p6.pack()
-	
+
 
 	button = tk.Button(popup, text="Save Settings", command=lambda popup=popup, settings_D=settings_D, phrase=phrase: set_tts_settings(popup, settings_D, phrase))
 	button.pack()
@@ -396,7 +421,7 @@ def run_TTS():
 def run_STT():
 	global ic, cmd_L, can_L
 	can_L[ic].create_rectangle(25, 25, 75, 75, fill="red")
-	
+
 	cmd_L.append({"type":"STT", "socket":s})
 	ic += 1
 

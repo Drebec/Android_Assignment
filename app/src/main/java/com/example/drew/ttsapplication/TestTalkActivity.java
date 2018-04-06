@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +39,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
     String pitch_S, speed_S;
     TTS tts;
     Network networkManager;
+    public static Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -76,16 +78,27 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
 
         //startListening();
 
+        //Looper.prepare();
+            //@SuppressLint("HandlerLeak")
+                handler = new Handler() {
+
+            public void handleMessage(Message msg) {
+                String aResponse = msg.getData().getString("main");
+                startListening();
+            }
+        };
+        //Looper.loop();
+
     }
 
-    @SuppressLint("HandlerLeak")
-    public static final Handler handler = new Handler() {
+    //@SuppressLint("HandlerLeak")
+    //handler = new Handler() {
 
-        public void handleMessage(Message msg) {
-            String aResponse = msg.getData().getString("client");
-            recText.setText(aResponse);
-        }
-    };
+        //public void handleMessage(Message msg) {
+        //  String aResponse = msg.getData().getString("main");
+        //    startListening();
+        //}
+    //};
 
     public void startListening() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -154,15 +167,7 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                 networkManager.handler.sendMessage(toClient);
                 break;
             case R.id.listenButton:
-                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Listening");
-                try {
-                    startActivityForResult(intent, 100);
-                } catch (ActivityNotFoundException e) {
-                    e.printStackTrace();
-                }
+                startListening();
         }
     }
 
@@ -193,11 +198,16 @@ public class TestTalkActivity extends AppCompatActivity implements View.OnClickL
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String message = result.get(0);
                     System.out.println(message);
-                    if(message.toLowerCase().equals("start")) {
-
-                    } else {
-                        startListening();
-                    }
+                    //if(message.toLowerCase().equals("start")) {
+                        //System.out.println(message);
+                        Message toClient = networkManager.handler.obtainMessage();
+                        Bundle n = new Bundle();
+                        n.putString("N", message);
+                        toClient.setData(n);
+                        networkManager.handler.sendMessage(toClient);
+                    //} else {
+                      //  startListening();
+                    //}
                     recText.setText(message);
                     //sendToNetwork(message);
                 }

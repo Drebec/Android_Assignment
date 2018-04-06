@@ -41,6 +41,7 @@ public class Send implements Runnable {
                 String send = msg.getData().getString("S");
                 printWriter.print(send);
                 printWriter.flush();
+                System.out.println("Sending");
             }
         };
         Looper.loop();
