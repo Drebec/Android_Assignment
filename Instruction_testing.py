@@ -46,7 +46,7 @@ class Motor:
         self.forward_back_target = forward_back_target
         self.left_right_target = left_right_target
         self.forward_back = forward_back
-        self.left_right = left_rightv
+        self.left_right = left_right
 
     def execute(self):
         c0.setTarget(FORWARD_BACK, 6000 + -1*(self.forward_back * self.forward_back_target))

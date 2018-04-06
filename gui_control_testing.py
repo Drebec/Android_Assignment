@@ -1,5 +1,5 @@
 import tkinter as tk
-from Instruction import *
+from Instruction_testing import *
 #from key_controller import KeyController
 import threading
 import sys
@@ -114,25 +114,28 @@ def decode(input):
 					command = Motor(1, 0, int(words[i+3]), 1200, 0)
 					createSendThread("Moving")
 					command.execute()
+					valid_speech = True
 					break
 				elif(words[i+1] == "backward"):
 					command = Motor(-1, 0, int(words[i+3]), 1200, 0)
 					createSendThread("Moving")
 					command.execute()
+					valid_speech = True
 					break
 				else:
 					pass
-				valid_speech = True
 				pass
 			elif(words[i] == "turn"):
 				if(words[i+1] == "right"):
 					command = Motor(0, 1, int(words[i+3]), 0, 1200)
 					createSendThread("Turning")
 					command.execute()
+					valid_speech = True
 					break
 				elif(words[i+1] == "left"):
 					command = Motor(0, -1, int(words[i+3]), 0, 1200)
 					createSendThread("Turning")
+					valid_speech = True
 					command.execute()
 					break
 				else:
